@@ -6,8 +6,9 @@ module ActiveModel
     class UrlValidator < ActiveModel::EachValidator
 
       def initialize(options)
-        options.reverse_merge!(:schemes => %w(http https))
-        options.reverse_merge!(:message => "is not a valid URL")
+        options.reverse_merge!(schemes: %w(http https))
+        options.reverse_merge!(message: "is not a valid URL")
+        options.reverse_merge!(reachable: false)
         super(options)
       end
 
@@ -16,10 +17,21 @@ module ActiveModel
         begin
           uri = Addressable::URI.parse(value)
           unless uri && schemes.include?(uri.scheme)
-            record.errors.add(attribute, options.fetch(:message), :value => value)
+            record.errors.add(attribute, "'s scheme is not one of #{schemes.join(' or ')}", value: value)
+          end
+          if options[:reachable] and %w(http https).include?(uri.scheme)
+            begin
+              case Net::HTTP.get_response(uri)
+                when Net::HTTPSuccess then true
+                when Net::HTTPRedirection then true
+                else record.errors.add(attribute, 'is a valid URL, but could not be accessed.', value: value) and false
+              end
+            rescue
+              record.errors.add(attribute, 'is a valid URL, but DNS lookup failed.', value: value) and false
+            end
           end
         rescue Addressable::URI::InvalidURIError
-          record.errors.add(attribute, options.fetch(:message), :value => value)
+          record.errors.add(attribute, options.fetch(:message), value: value)
         end
       end
     end
@@ -45,3 +57,8 @@ module ActiveModel
     end
   end
 end
+
+
+# Thanks Ilya! http://www.igvita.com/2006/09/07/validating-url-in-ruby-on-rails/
+# Original credits: http://blog.inquirylabs.com/2006/04/13/simple-uri-validation/
+# HTTP Codes: http://www.ruby-doc.org/stdlib/libdoc/net/http/rdoc/classes/Net/HTTPResponse.html
