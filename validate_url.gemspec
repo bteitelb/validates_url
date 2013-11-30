@@ -42,6 +42,7 @@ Gem::Specification.new do |s|
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
+      s.add_dependency(%q<addressable>, [">= 2.3"])
       s.add_runtime_dependency(%q<activemodel>, [">= 3.0.0"])
       s.add_development_dependency(%q<rspec>, [">= 0"])
       s.add_development_dependency(%q<diff-lcs>, [">= 1.1.2"])
