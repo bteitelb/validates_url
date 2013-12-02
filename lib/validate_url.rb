@@ -26,8 +26,8 @@ module ActiveModel
                 when Net::HTTPRedirection then true
                 else record.errors.add(attribute, 'is a valid URL, but could not be accessed.', value: value) and false
               end
-            rescue
-              record.errors.add(attribute, 'is a valid URL, but DNS lookup failed.', value: value) and false
+            rescue Exception => e
+              record.errors.add(attribute, "is a valid URL, but DNS lookup failed. Reason: #{e.try(:message)} ", value: value) and false
             end
           end
         rescue Addressable::URI::InvalidURIError
