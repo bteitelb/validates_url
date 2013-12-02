@@ -21,7 +21,7 @@ module ActiveModel
           end
           if options[:reachable] and %w(http https).include?(uri.scheme)
             begin
-              case Net::HTTP.get_response(uri)
+              case Net::HTTP.get_response(URI(value))
                 when Net::HTTPSuccess then true
                 when Net::HTTPRedirection then true
                 else record.errors.add(attribute, 'is a valid URL, but could not be accessed.', value: value) and false
