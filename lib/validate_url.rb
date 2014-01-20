@@ -17,17 +17,17 @@ module ActiveModel
         begin
           uri = Addressable::URI.parse(value)
           unless uri && schemes.include?(uri.scheme)
-            record.errors.add(attribute, "'s scheme is not one of #{schemes.join(' or ')}", value: value)
+            record.errors.add(attribute, "scheme is not one of #{schemes.join(' or ')}", value: value)
           end
           if options[:reachable] and %w(http https).include?(uri.scheme)
             begin
               case Net::HTTP.get_response(URI(value))
                 when Net::HTTPSuccess then true
                 when Net::HTTPRedirection then true
-                else record.errors.add(attribute, 'is a valid URL, but could not be accessed.', value: value) and false
+                else record.errors.add(attribute, 'valid URL, but could not be accessed.', value: value) and false
               end
             rescue Exception => e
-              record.errors.add(attribute, "is a valid URL, but DNS lookup failed. Reason: #{e.try(:message)} ", value: value) and false
+              record.errors.add(attribute, "valid URL, but DNS lookup failed. Reason: #{e.try(:message)} ", value: value) and false
             end
           end
         rescue Addressable::URI::InvalidURIError
